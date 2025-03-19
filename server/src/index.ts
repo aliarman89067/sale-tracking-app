@@ -10,6 +10,7 @@ import dotEnv from "dotenv";
 import adminRoutes from "./routes/adminRoutes";
 import agentRoutes from "./routes/agentRoutes";
 import organizationRoutes from "./routes/organizationRoutes";
+import memberRoutes from "./routes/memberRoutes";
 // MIDDLEWARE IMPORTS
 import { authMiddleware } from "./middleware.ts/authMiddleware";
 
@@ -31,6 +32,7 @@ app.use(
   authMiddleware(["admin", "agent"]),
   organizationRoutes
 );
+app.use("/members", authMiddleware(["admin"]), memberRoutes);
 
 // TESTING ROUTE
 app.get("/", (req, res) => {

@@ -24,7 +24,7 @@ enum CALENDAR_DAYS_STATUS {
   REMAINING_DAY
 }
 model Admin {
-  id            Int @id @default(autoincrement())
+  id            String @id @default(uuid())
   cognitoId     String @unique
   adminName     String
   email         String @unique
@@ -36,7 +36,7 @@ model Admin {
   updatedAt     DateTime @updatedAt
 }
 model Agent {
-  id            Int @id @default(autoincrement())
+  id            String @id @default(uuid())
   cognitoId     String @unique
   agentName     String
   email         String @unique
@@ -47,7 +47,7 @@ model Agent {
   updatedAt     DateTime @updatedAt
 }
 model Organization {
-  id                  Int @id @default(autoincrement())
+  id                  String @id @default(uuid())
   imageUrl            String @default("/defaultOrganization.png")
   adminCognitoId      String
   admin               Admin @relation(fields: [adminCognitoId], references: [cognitoId], onDelete: Cascade)
@@ -59,7 +59,7 @@ model Organization {
   sales               Sale[]
 }
 model Member {
-  id              Int @id @default(autoincrement())
+  id             String @id @default(uuid())
   name            String
   email           String
   imageUrl        String @default("/defaultPersonImage.png")
@@ -72,34 +72,34 @@ model Member {
   salary          Int
   targetCurrency  String
   salaryCurrency  String
-  organizationId  Int
+  organizationId  String
   organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   calendarDays    CalendarDays[]
   calendarDetails CalendarDetails[]
   Sales           Sale[]
 }
 model CalendarDays {
-  id              Int @id @default(autoincrement())
+  id              String @id @default(uuid())
   date            DateTime
   day             Int
   status          CALENDAR_DAYS_STATUS
   sale            String?
   leaveReason     String?
-  memberId        Int
+  memberId        String
   member          Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 model CalendarDetails {
-  id              Int @id @default(autoincrement())
+  id              String @id @default(uuid())
   saleDays        String
   notSaleDays     String
   leaveDays       String
   weekendDays     String
   remainingDays   String
-  memberId        Int
+  memberId        String
   member          Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 model Sale {
-  id                  Int @id @default(autoincrement())
+  id                  String @id @default(uuid())
   year                String
   month               String
   clientImageUrl      String
@@ -110,18 +110,18 @@ model Sale {
   paidAmount          String
   remainingAmount     String
   description         String?
-  organizationId      Int
+  organizationId      String
   organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  memberId            Int
+  memberId            String
   member              Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  previousMonthId     Int?
+  previousMonthId     String?
   previousMonth       PreviousMonth? @relation(fields: [previousMonthId], references: [id], onDelete: Cascade)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
 }
 model PreviousMonth {
-  id            Int @id @default(autoincrement())
+  id            String @id @default(uuid())
   year          String
   month         String
   date          DateTime

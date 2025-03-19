@@ -22,11 +22,48 @@ export const getOrganizations = async (
       include: {
         members: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     res.status(200).json(organizations);
   } catch (error) {
     console.log("Failed to fetch organizations ", error);
     res.status(400).json({ message: "Failed to fetch oraganizations" });
+  }
+};
+
+interface GetOrganizationNameRequest extends Request {
+  params: {
+    organizationId: string;
+    adminCognitoId: string;
+  };
+}
+
+export const getOrganizationName = async (
+  req: GetOrganizationNameRequest,
+  res: Response
+) => {
+  try {
+    const { organizationId, adminCognitoId } = req.params;
+    if (!organizationId || !adminCognitoId) {
+      res.status(400).json({ message: "Payload is not correct!" });
+      return;
+    }
+    const organization = await prisma.organization.findUnique({
+      where: {
+        id: organizationId,
+        adminCognitoId,
+      },
+    });
+    if (!organization) {
+      res.status(404).json({ message: "Organization not found!" });
+      return;
+    }
+    res.json(organization);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Failed to get organization name" });
   }
 };
 
@@ -122,7 +159,7 @@ export const createOrganization = async (
           salaryCurrency,
         } = memberData;
 
-        const member = await prisma.member.create({
+        await prisma.member.create({
           data: {
             imageUrl,
             name,

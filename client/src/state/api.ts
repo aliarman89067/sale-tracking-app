@@ -1,4 +1,4 @@
-import { CreateOrganizationFormType } from "@/lib/types";
+import { CreateOrganizationFormType, MembersType } from "@/lib/types";
 import { createNewUser, getNameByRole } from "@/lib/utils";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
@@ -63,7 +63,39 @@ export const api = createApi({
         body,
       }),
     }),
+    getMemberOrganization: build.query<
+      OrganizationsProps[],
+      { adminCognitoId?: string }
+    >({
+      query: ({ adminCognitoId }) => ({
+        url: `/organizations/${adminCognitoId}`,
+      }),
+    }),
+    getOrganizationName: build.query<
+      Partial<OrganizationsProps>,
+      { organizationId: string; adminCognitoId?: string }
+    >({
+      query: ({ organizationId, adminCognitoId }) => ({
+        url: `/organizations/${organizationId}/${adminCognitoId}`,
+      }),
+    }),
+    addMembersInOrganization: build.mutation<
+      MembersType,
+      MembersType & { organizationId: string; adminCognitoId: string }
+    >({
+      query: ({ organizationId, adminCognitoId, members }) => ({
+        url: `/members`,
+        method: "POST",
+        body: { organizationId, adminCognitoId, members },
+      }),
+    }),
   }),
 });
 
-export const { useGetAuthUserQuery, useCreateOrganizationMutation } = api;
+export const {
+  useGetAuthUserQuery,
+  useCreateOrganizationMutation,
+  useGetMemberOrganizationQuery,
+  useGetOrganizationNameQuery,
+  useAddMembersInOrganizationMutation,
+} = api;

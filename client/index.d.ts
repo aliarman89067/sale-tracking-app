@@ -73,3 +73,20 @@ interface MemberAddingFormProps {
   index: number;
   removeMember: (id: number) => void;
 }
+interface OrganizationsProps {
+  id: string;
+  imageUrl: string;
+  organizationName: string;
+  organizationKeyword: string;
+  members?: {
+    id: string;
+    imageUrl: string;
+    name: string;
+    email: string;
+  }[];
+}
+interface AddMemberProps {
+  params: Promise<{
+    organizationId: string;
+  }>;
+}

@@ -9,7 +9,6 @@ export const EmptyPaperPlaneCTA = ({
   return (
     <div
       style={{ height: `calc(100vh - ${NAVBAR_HEIGHT}px)` }}
-      onClick={onClick}
       className="flex w-full items-center justify-center"
     >
       <div className="flex flex-col items-center justify-between gap-4">
@@ -22,7 +21,7 @@ export const EmptyPaperPlaneCTA = ({
         />
         <CTAPrimaryButton
           title={title}
-          onClick={() => {}}
+          onClick={onClick}
           classNames="bg-primaryGray ring-primaryGray w-[450px]"
         />
       </div>

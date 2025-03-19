@@ -99,7 +99,7 @@ const OrganizationCreate = () => {
 
       for (let i = prevMembers.length; i < membersLength; i++) {
         updatedMembers.push({
-          id: Date.now(),
+          id: Date.now() + i,
           imageUrl: "/defaultPersonImage.png",
           email: "",
           salary: "",
@@ -140,8 +140,19 @@ const OrganizationCreate = () => {
     }
     form.setValue("members", updatedMembers);
   };
+
   const onSubmit = async (values: CreateOrganizationFormType) => {
-    createOrganization({ ...values, adminCognitoId: authData?.cognitoId });
+    const { data, error } = await createOrganization({
+      ...values,
+      adminCognitoId: authData?.cognitoId,
+    });
+    if (error) {
+      // TODO: add error toast notification
+      return;
+    }
+    if (data) {
+      router.push("/organizations/admin");
+    }
   };
 
   return (

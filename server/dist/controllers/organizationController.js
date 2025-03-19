@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOrganization = exports.getOrganizations = void 0;
+exports.createOrganization = exports.getOrganizationName = exports.getOrganizations = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getOrganizations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -22,6 +22,9 @@ const getOrganizations = (req, res) => __awaiter(void 0, void 0, void 0, functio
             include: {
                 members: true,
             },
+            orderBy: {
+                createdAt: "desc",
+            },
         });
         res.status(200).json(organizations);
     }
@@ -31,6 +34,31 @@ const getOrganizations = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getOrganizations = getOrganizations;
+const getOrganizationName = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { organizationId, adminCognitoId } = req.params;
+        if (!organizationId || !adminCognitoId) {
+            res.status(400).json({ message: "Payload is not correct!" });
+            return;
+        }
+        const organization = yield prisma.organization.findUnique({
+            where: {
+                id: organizationId,
+                adminCognitoId,
+            },
+        });
+        if (!organization) {
+            res.status(404).json({ message: "Organization not found!" });
+            return;
+        }
+        res.json(organization);
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to get organization name" });
+    }
+});
+exports.getOrganizationName = getOrganizationName;
 const createOrganization = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { imageUrl, adminCognitoId, organizationName, organizationKeyword, isMember, members, } = req.body;
     try {
@@ -74,7 +102,7 @@ const createOrganization = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (isMember && members) {
             const createMembers = members.map((memberData) => __awaiter(void 0, void 0, void 0, function* () {
                 const { name, email, salary, monthlyTarget, phoneNumber, imageUrl, targetCurrency, salaryCurrency, } = memberData;
-                const member = yield prisma.member.create({
+                yield prisma.member.create({
                     data: {
                         imageUrl,
                         name,

@@ -74,3 +74,37 @@ export const CreateOrganizationFormSchema = z
 export type CreateOrganizationFormType = z.infer<
   typeof CreateOrganizationFormSchema
 >;
+
+export const MembersSchema = z.object({
+  members: z.array(
+    z.object({
+      id: z.number(),
+      imageUrl: z.string().default("defaultPersonImage.png").optional(),
+      name: z.string().min(1, { message: "Member name is required!" }),
+      email: z.string().min(1, { message: "Member email is required!" }),
+      phoneNumber: z.string().optional(),
+      targetCurrency: z
+        .string()
+        .min(1, { message: "Currency is required!" })
+        .default("$"),
+      salaryCurrency: z
+        .string()
+        .min(1, { message: "Currency is required!" })
+        .default("$"),
+      monthlyTarget: z
+        .string()
+        .min(1, { message: "Member Monthly Target is required!" })
+        .refine((data) => !isNaN(Number(data)), {
+          message: "Monthly target must be a number",
+        }),
+      salary: z
+        .string()
+        .min(1, { message: "Member Monthly Salary is required!" })
+        .refine((data) => !isNaN(Number(data)), {
+          message: "Monthly Salary must be a number",
+        }),
+    })
+  ),
+});
+
+export type MembersType = z.infer<typeof MembersSchema>;

@@ -15,6 +15,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const agentRoutes_1 = __importDefault(require("./routes/agentRoutes"));
 const organizationRoutes_1 = __importDefault(require("./routes/organizationRoutes"));
+const memberRoutes_1 = __importDefault(require("./routes/memberRoutes"));
 // MIDDLEWARE IMPORTS
 const authMiddleware_1 = require("./middleware.ts/authMiddleware");
 dotenv_1.default.config();
@@ -30,6 +31,7 @@ app.use((0, cors_1.default)());
 app.use("/admin", (0, authMiddleware_1.authMiddleware)(["admin"]), adminRoutes_1.default);
 app.use("/agent", (0, authMiddleware_1.authMiddleware)(["agent"]), agentRoutes_1.default);
 app.use("/organizations", (0, authMiddleware_1.authMiddleware)(["admin", "agent"]), organizationRoutes_1.default);
+app.use("/members", (0, authMiddleware_1.authMiddleware)(["admin"]), memberRoutes_1.default);
 // TESTING ROUTE
 app.get("/", (req, res) => {
     res.send("Hello World");
