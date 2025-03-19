@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum USER_ROLE {
+  admin
+  agent
+}
+enum CALENDAR_DAYS_STATUS {
+  SALE
+  NOT_SALE
+  LEAVE
+  HOLIDAY
+  REMAINING_DAY
+}
+model Admin {
+  id            Int @id @default(autoincrement())
+  cognitoId     String @unique
+  adminName     String
+  email         String @unique
+  phoneNumber   String?
+  imageUrl      String @default("/defaultPersonImage.png")
+  role          USER_ROLE
+  organizations Organization[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Agent {
+  id            Int @id @default(autoincrement())
+  cognitoId     String @unique
+  agentName     String
+  email         String @unique
+  phoneNumber   String?
+  imageUrl      String @default("/defaultPersonImage.png")
+  role          USER_ROLE
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Organization {
+  id                  Int @id @default(autoincrement())
+  imageUrl            String @default("/defaultOrganization.png")
+  adminCognitoId      String
+  admin               Admin @relation(fields: [adminCognitoId], references: [cognitoId], onDelete: Cascade)
+  organizationName    String
+  organizationKeyword String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  members             Member[]
+  sales               Sale[]
+}
+model Member {
+  id              Int @id @default(autoincrement())
+  name            String
+  email           String
+  imageUrl        String @default("/defaultPersonImage.png")
+  phoneNumber     String?
+  monthlyTarget   Int
+  todaySale       Int
+  currentSale     Int
+  overallSale     Int
+  numberOfAccount Int?
+  salary          Int
+  targetCurrency  String
+  salaryCurrency  String
+  organizationId  Int
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  calendarDays    CalendarDays[]
+  calendarDetails CalendarDetails[]
+  Sales           Sale[]
+}
+model CalendarDays {
+  id              Int @id @default(autoincrement())
+  date            DateTime
+  day             Int
+  status          CALENDAR_DAYS_STATUS
+  sale            String?
+  leaveReason     String?
+  memberId        Int
+  member          Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+model CalendarDetails {
+  id              Int @id @default(autoincrement())
+  saleDays        String
+  notSaleDays     String
+  leaveDays       String
+  weekendDays     String
+  remainingDays   String
+  memberId        Int
+  member          Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+model Sale {
+  id                  Int @id @default(autoincrement())
+  year                String
+  month               String
+  clientImageUrl      String
+  clientName          String
+  clientEmail         String
+  clientPhoneNumber   String?
+  totalPayment        String
+  paidAmount          String
+  remainingAmount     String
+  description         String?
+  organizationId      Int
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberId            Int
+  member              Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  previousMonthId     Int?
+  previousMonth       PreviousMonth? @relation(fields: [previousMonthId], references: [id], onDelete: Cascade)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+}
+model PreviousMonth {
+  id            Int @id @default(autoincrement())
+  year          String
+  month         String
+  date          DateTime
+  target        String
+  totalSales    String
+  totalClient   Int
+  sales         Sale[]
+}
