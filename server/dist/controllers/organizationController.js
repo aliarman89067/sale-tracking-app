@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOrganization = exports.getOrganizationName = exports.getOrganizations = void 0;
+exports.getOrganizationMembers = exports.createOrganization = exports.getOrganizationName = exports.getOrganizations = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getOrganizations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -20,7 +20,11 @@ const getOrganizations = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 adminCognitoId,
             },
             include: {
-                members: true,
+                members: {
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                },
             },
             orderBy: {
                 createdAt: "desc",
@@ -102,7 +106,22 @@ const createOrganization = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (isMember && members) {
             const createMembers = members.map((memberData) => __awaiter(void 0, void 0, void 0, function* () {
                 const { name, email, salary, monthlyTarget, phoneNumber, imageUrl, targetCurrency, salaryCurrency, } = memberData;
-                yield prisma.member.create({
+                // Create Calendars Data
+                const todayData = new Date();
+                const year = todayData.getFullYear();
+                const month = todayData.getMonth();
+                const totalDays = new Date(year, month + 1, 0).getDate();
+                const dateResult = [];
+                for (let day = 0; day < totalDays; day++) {
+                    const currentDate = new Date(year, month, day);
+                    const status = currentDate < todayData ? "NOT_SALE" : "REMAINING_DAY";
+                    dateResult.push({
+                        date: currentDate.toISOString().split("T")[0],
+                        day,
+                        status,
+                    });
+                }
+                const member = yield prisma.member.create({
                     data: {
                         imageUrl,
                         name,
@@ -116,8 +135,19 @@ const createOrganization = (req, res) => __awaiter(void 0, void 0, void 0, funct
                         organizationId: organization.id,
                         targetCurrency,
                         salaryCurrency,
+                        keyword: organizationKeyword,
                     },
                 });
+                dateResult.map((date) => __awaiter(void 0, void 0, void 0, function* () {
+                    yield prisma.calendarDays.create({
+                        data: {
+                            day: date.day,
+                            date: date.date,
+                            status: date.status,
+                            memberId: member.id,
+                        },
+                    });
+                }));
             }));
             yield Promise.all(createMembers);
         }
@@ -129,3 +159,35 @@ const createOrganization = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.createOrganization = createOrganization;
+const getOrganizationMembers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { organizationId, adminCognitoId } = req.params;
+    console.log(organizationId, adminCognitoId);
+    try {
+        const organization = yield prisma.organization.findUnique({
+            where: {
+                id: organizationId,
+                adminCognitoId,
+            },
+            include: {
+                members: {
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                },
+            },
+        });
+        if (!organization) {
+            res.status(404).json({ message: "No organization found!" });
+            return;
+        }
+        res.status(200).json(organization);
+    }
+    catch (error) {
+        console.log("Failed to get organization member", error);
+        res.status(500).json({
+            message: `Failed to get organization members ${(_a = error.message) !== null && _a !== void 0 ? _a : ""}`,
+        });
+    }
+});
+exports.getOrganizationMembers = getOrganizationMembers;

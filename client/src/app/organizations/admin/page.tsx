@@ -8,7 +8,7 @@ import {
 import { ArrowRight, Loader2, Plus } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React from "react";
 
 const AdminOrganizations = () => {
   const router = useRouter();
@@ -44,7 +44,7 @@ const AdminOrganizations = () => {
     <section className="max-w-screen-xl w-full mx-auto px-2 sm:px-4">
       {isOrganizationData ? (
         <div className="flex max-w-screen-sm lg:max-w-screen-lg xl:max-w-screen-xl w-full mx-auto justify-center mt-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 w-full h-fit gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 w-full h-fit gap-4">
             <div
               onClick={() => router.push("/organizations/create")}
               className="py-4 px-5 border border-gray-300 hover:border-gray-400 transition-all duration-200 ease-linear shadow-sm hover:shadow-md rounded-xl cursor-pointer"
@@ -73,6 +73,15 @@ const AdminOrganizations = () => {
                 <div className="flex flex-col w-full">
                   <div className="flex justify-between">
                     <div className="flex flex-col gap-1">
+                      <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                        <Image
+                          src={organization.imageUrl}
+                          alt="Organization Image"
+                          width={600}
+                          height={600}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      </div>
                       <span className="font-semibold text-lg text-primaryGray">
                         {organization.organizationKeyword} Sales Team
                       </span>
@@ -98,7 +107,12 @@ const AdminOrganizations = () => {
                     <MemberRow organization={organization} />
                   </div>
                 </div>
-                <Button className="mt-3 flex items-center justify-center w-full bg-brand-500 hover:bg-brand-500/90 h-12 rounded-lg">
+                <Button
+                  onClick={() =>
+                    router.push(`/organizations/members/${organization.id}`)
+                  }
+                  className="mt-3 flex items-center justify-center w-full bg-brand-500 hover:bg-brand-500/90 h-12 rounded-lg"
+                >
                   See All
                   <span>({membersLength(organization)})</span>
                   <ArrowRight />
@@ -128,6 +142,7 @@ const MemberRow = ({ organization }: { organization: OrganizationsProps }) => {
         organization.members.slice(0, 3).map((member) => (
           <div
             key={member.id}
+            onClick={() => router.push(`/organizations/member/${member.id}`)}
             className="border border-gray-300 hover:border-gray-400 cursor-pointer px-3 py-2 rounded-lg w-full hover:w-[102%] transition-all duration-200 ease-in-out"
           >
             <div className="flex justify-between">
@@ -146,7 +161,7 @@ const MemberRow = ({ organization }: { organization: OrganizationsProps }) => {
                     {member.name}
                   </h2>
                   <span className="font-medium text-secondaryGray text-sm">
-                    {member.email}
+                    {member.email.substring(0, 15)}...
                   </span>
                   <div className="bg-white border border-gray-300 px-3 py-1 rounded-full flex items-center justify-center mt-1">
                     <span className="text-secondaryGray text-sm font-light">
@@ -156,7 +171,10 @@ const MemberRow = ({ organization }: { organization: OrganizationsProps }) => {
                 </div>
               </div>
               <button
-                onClick={() => router.push(`/agent/add/data/${member.id}`)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/agent/add/data/${member.id}`);
+                }}
                 className="group bg-brand-500 px-5 h-fit rounded-full py-1 hover:bg-white cursor-pointer border hover:border-gray-200 transition-all duration-200 ease-in-out"
               >
                 <span className="text-white group-hover:text-brand-500 text-sm">

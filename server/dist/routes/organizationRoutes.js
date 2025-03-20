@@ -10,4 +10,5 @@ router.get("/:adminCognitoId", organizationController_1.getOrganizations);
 router.get("/:organizationId/:adminCognitoId", organizationController_1.getOrganizationName);
 router.post("/", organizationController_1.createOrganization);
 router.put("/:adminCognitoId", (req, res) => { });
+router.get("/members/:organizationId/:adminCognitoId", organizationController_1.getOrganizationMembers);
 exports.default = router;

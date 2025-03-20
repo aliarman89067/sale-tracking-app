@@ -71,7 +71,35 @@ export const createMembers = async (
         salaryCurrency,
       } = memberData;
 
-      return await prisma.member.create({
+      // Create Calendars Data
+      const todayData = new Date();
+      const year = todayData.getFullYear();
+      const month = todayData.getMonth();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      const dateResult: {
+        date: string;
+        day: number;
+        status: "SALE" | "NOT_SALE" | "LEAVE" | "HOLIDAY" | "REMAINING_DAY";
+      }[] = [];
+
+      for (let day = 0; day < totalDays; day++) {
+        const currentDate = new Date(year, month, day);
+        const status:
+          | "SALE"
+          | "NOT_SALE"
+          | "LEAVE"
+          | "HOLIDAY"
+          | "REMAINING_DAY" =
+          currentDate < todayData ? "NOT_SALE" : "REMAINING_DAY";
+        dateResult.push({
+          date: currentDate.toISOString().split("T")[0],
+          day,
+          status,
+        });
+      }
+
+      const member = await prisma.member.create({
         data: {
           imageUrl,
           name,
@@ -85,13 +113,59 @@ export const createMembers = async (
           organizationId: organizationId,
           targetCurrency,
           salaryCurrency,
+          keyword: checkOrganization.organizationKeyword,
         },
       });
+      dateResult.map(async (date) => {
+        await prisma.calendarDays.create({
+          data: {
+            day: date.day,
+            date: date.date,
+            status: date.status,
+            memberId: member.id,
+          },
+        });
+      });
+      return member;
     });
     const newMembersData = await Promise.all(newMembers);
     res.status(201).json(newMembersData);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Failed to create members" });
+  }
+};
+
+interface GetMemberRequest extends Request {
+  params: {
+    memberId: string;
+  };
+}
+
+export const getMember = async (req: GetMemberRequest, res: Response) => {
+  const { memberId } = req.params;
+  try {
+    if (!memberId) {
+      res.status(404).json({ message: "Payload is not correct!" });
+    }
+    const member = await prisma.member.findUnique({
+      where: {
+        id: memberId,
+      },
+      include: {
+        calendarDays: true,
+        organization: true,
+      },
+    });
+    if (!member) {
+      res.status(404).json({ message: "No member found!" });
+      return;
+    }
+    res.status(200).json(member);
+  } catch (error: any) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: `Failed to retreive member ${error.message ?? ""}` });
   }
 };

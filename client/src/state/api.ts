@@ -89,6 +89,19 @@ export const api = createApi({
         body: { organizationId, adminCognitoId, members },
       }),
     }),
+    getOrganizationMembers: build.query<
+      OrganizationsProps,
+      { organizationId: string; adminCognitoId?: string }
+    >({
+      query: ({ organizationId, adminCognitoId }) => ({
+        url: `/organizations/members/${organizationId}/${adminCognitoId}`,
+      }),
+    }),
+    getMember: build.query<MembersDetailsProps, { memberId: string }>({
+      query: ({ memberId }) => ({
+        url: `/members/${memberId}`,
+      }),
+    }),
   }),
 });
 
@@ -98,4 +111,6 @@ export const {
   useGetMemberOrganizationQuery,
   useGetOrganizationNameQuery,
   useAddMembersInOrganizationMutation,
+  useGetOrganizationMembersQuery,
+  useGetMemberQuery,
 } = api;

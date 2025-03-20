@@ -31,7 +31,7 @@ const AddMemberPage = ({ organizationId }: { organizationId: string }) => {
       skip: !authData?.cognitoId || !organizationId,
     }
   );
-  const [addMembers, result] = useAddMembersInOrganizationMutation();
+  const [addMembers] = useAddMembersInOrganizationMutation();
 
   const form = useForm<MembersType>({
     resolver: zodResolver(MembersSchema),

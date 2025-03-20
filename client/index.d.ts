@@ -83,10 +83,58 @@ interface OrganizationsProps {
     imageUrl: string;
     name: string;
     email: string;
+    monthlyTarget: number;
+    targetCurrency: string;
   }[];
 }
 interface AddMemberProps {
   params: Promise<{
     organizationId: string;
   }>;
+}
+interface MembersPageProps {
+  params: Promise<{
+    organizationId: string;
+  }>;
+}
+interface MembersGrid {
+  organizationId: string;
+}
+interface MemberDetails {
+  params: Promise<{
+    memberId: string;
+  }>;
+}
+interface MemberDetailsContainerProps {
+  memberId: string;
+}
+interface MembersDetailsProps {
+  id: string;
+  name: string;
+  email: string;
+  imageUrl: string;
+  phoneNumber?: string;
+  monthlyTarget: number;
+  todaySale: number;
+  currentSale: number;
+  overallSale: number;
+  numberOfAccount?: number;
+  salary: number;
+  targetCurrency: string;
+  salaryCurrency: string;
+  keyword: string;
+  calendarDays: CalendarDaysProps[];
+  // calendarDetails CalendarDetails[]
+  // Sales           Sale[]
+  createdAt: Date;
+  updatedAt: Date;
+}
+interface CalendarDaysProps {
+  id: string;
+  date: string;
+  day: number;
+  status: "SALE" | "NOT_SALE" | "LEAVE" | "HOLIDAY" | "REMAINING_DAY";
+  sale?: string;
+  leaveReason?: string;
+  memberId: string;
 }

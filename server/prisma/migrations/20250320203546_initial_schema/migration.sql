@@ -6,7 +6,7 @@ CREATE TYPE "CALENDAR_DAYS_STATUS" AS ENUM ('SALE', 'NOT_SALE', 'LEAVE', 'HOLIDA
 
 -- CreateTable
 CREATE TABLE "Admin" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "cognitoId" TEXT NOT NULL,
     "adminName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE "Admin" (
 
 -- CreateTable
 CREATE TABLE "Agent" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "cognitoId" TEXT NOT NULL,
     "agentName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE "Agent" (
 
 -- CreateTable
 CREATE TABLE "Organization" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL DEFAULT '/defaultOrganization.png',
     "adminCognitoId" TEXT NOT NULL,
     "organizationName" TEXT NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE "Organization" (
 
 -- CreateTable
 CREATE TABLE "Member" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL DEFAULT '/defaultPersonImage.png',
@@ -62,40 +62,42 @@ CREATE TABLE "Member" (
     "salary" INTEGER NOT NULL,
     "targetCurrency" TEXT NOT NULL,
     "salaryCurrency" TEXT NOT NULL,
-    "organizationId" INTEGER NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Member_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "CalendarDays" (
-    "id" SERIAL NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
+    "id" TEXT NOT NULL,
+    "date" TEXT NOT NULL,
     "day" INTEGER NOT NULL,
     "status" "CALENDAR_DAYS_STATUS" NOT NULL,
     "sale" TEXT,
     "leaveReason" TEXT,
-    "memberId" INTEGER NOT NULL,
+    "memberId" TEXT NOT NULL,
 
     CONSTRAINT "CalendarDays_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "CalendarDetails" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "saleDays" TEXT NOT NULL,
     "notSaleDays" TEXT NOT NULL,
     "leaveDays" TEXT NOT NULL,
     "weekendDays" TEXT NOT NULL,
     "remainingDays" TEXT NOT NULL,
-    "memberId" INTEGER NOT NULL,
+    "memberId" TEXT NOT NULL,
 
     CONSTRAINT "CalendarDetails_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Sale" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "year" TEXT NOT NULL,
     "month" TEXT NOT NULL,
     "clientImageUrl" TEXT NOT NULL,
@@ -106,9 +108,9 @@ CREATE TABLE "Sale" (
     "paidAmount" TEXT NOT NULL,
     "remainingAmount" TEXT NOT NULL,
     "description" TEXT,
-    "organizationId" INTEGER NOT NULL,
-    "memberId" INTEGER NOT NULL,
-    "previousMonthId" INTEGER,
+    "organizationId" TEXT NOT NULL,
+    "memberId" TEXT NOT NULL,
+    "previousMonthId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -117,7 +119,7 @@ CREATE TABLE "Sale" (
 
 -- CreateTable
 CREATE TABLE "PreviousMonth" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "year" TEXT NOT NULL,
     "month" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,

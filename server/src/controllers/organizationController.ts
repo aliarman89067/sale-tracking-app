@@ -20,7 +20,11 @@ export const getOrganizations = async (
         adminCognitoId,
       },
       include: {
-        members: true,
+        members: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -158,8 +162,35 @@ export const createOrganization = async (
           targetCurrency,
           salaryCurrency,
         } = memberData;
+        // Create Calendars Data
+        const todayData = new Date();
+        const year = todayData.getFullYear();
+        const month = todayData.getMonth();
+        const totalDays = new Date(year, month + 1, 0).getDate();
 
-        await prisma.member.create({
+        const dateResult: {
+          date: string;
+          day: number;
+          status: "SALE" | "NOT_SALE" | "LEAVE" | "HOLIDAY" | "REMAINING_DAY";
+        }[] = [];
+
+        for (let day = 0; day < totalDays; day++) {
+          const currentDate = new Date(year, month, day);
+          const status:
+            | "SALE"
+            | "NOT_SALE"
+            | "LEAVE"
+            | "HOLIDAY"
+            | "REMAINING_DAY" =
+            currentDate < todayData ? "NOT_SALE" : "REMAINING_DAY";
+          dateResult.push({
+            date: currentDate.toISOString().split("T")[0],
+            day,
+            status,
+          });
+        }
+
+        const member = await prisma.member.create({
           data: {
             imageUrl,
             name,
@@ -173,7 +204,18 @@ export const createOrganization = async (
             organizationId: organization.id,
             targetCurrency,
             salaryCurrency,
+            keyword: organizationKeyword,
           },
+        });
+        dateResult.map(async (date) => {
+          await prisma.calendarDays.create({
+            data: {
+              day: date.day,
+              date: date.date,
+              status: date.status,
+              memberId: member.id,
+            },
+          });
         });
       });
       await Promise.all(createMembers);
@@ -182,5 +224,46 @@ export const createOrganization = async (
   } catch (error) {
     console.log("Failed to create organizations ", error);
     res.status(400).json({ message: "Failed to create oraganizations" });
+  }
+};
+
+interface GetOrganizationMembersRequest {
+  params: {
+    organizationId: string;
+    adminCognitoId: string;
+  };
+}
+
+export const getOrganizationMembers = async (
+  req: GetOrganizationMembersRequest,
+  res: Response
+) => {
+  const { organizationId, adminCognitoId } = req.params;
+
+  console.log(organizationId, adminCognitoId);
+  try {
+    const organization = await prisma.organization.findUnique({
+      where: {
+        id: organizationId,
+        adminCognitoId,
+      },
+      include: {
+        members: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
+    if (!organization) {
+      res.status(404).json({ message: "No organization found!" });
+      return;
+    }
+    res.status(200).json(organization);
+  } catch (error: any) {
+    console.log("Failed to get organization member", error);
+    res.status(500).json({
+      message: `Failed to get organization members ${error.message ?? ""}`,
+    });
   }
 };

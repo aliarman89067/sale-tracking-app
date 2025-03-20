@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createMembers = void 0;
+exports.getMember = exports.createMembers = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const createMembers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,7 +42,22 @@ const createMembers = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         const newMembers = members.map((memberData) => __awaiter(void 0, void 0, void 0, function* () {
             const { name, email, salary, monthlyTarget, phoneNumber, imageUrl, targetCurrency, salaryCurrency, } = memberData;
-            return yield prisma.member.create({
+            // Create Calendars Data
+            const todayData = new Date();
+            const year = todayData.getFullYear();
+            const month = todayData.getMonth();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            const dateResult = [];
+            for (let day = 0; day < totalDays; day++) {
+                const currentDate = new Date(year, month, day);
+                const status = currentDate < todayData ? "NOT_SALE" : "REMAINING_DAY";
+                dateResult.push({
+                    date: currentDate.toISOString().split("T")[0],
+                    day,
+                    status,
+                });
+            }
+            const member = yield prisma.member.create({
                 data: {
                     imageUrl,
                     name,
@@ -56,8 +71,20 @@ const createMembers = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     organizationId: organizationId,
                     targetCurrency,
                     salaryCurrency,
+                    keyword: checkOrganization.organizationKeyword,
                 },
             });
+            dateResult.map((date) => __awaiter(void 0, void 0, void 0, function* () {
+                yield prisma.calendarDays.create({
+                    data: {
+                        day: date.day,
+                        date: date.date,
+                        status: date.status,
+                        memberId: member.id,
+                    },
+                });
+            }));
+            return member;
         }));
         const newMembersData = yield Promise.all(newMembers);
         res.status(201).json(newMembersData);
@@ -68,3 +95,33 @@ const createMembers = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.createMembers = createMembers;
+const getMember = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { memberId } = req.params;
+    try {
+        if (!memberId) {
+            res.status(404).json({ message: "Payload is not correct!" });
+        }
+        const member = yield prisma.member.findUnique({
+            where: {
+                id: memberId,
+            },
+            include: {
+                calendarDays: true,
+                organization: true,
+            },
+        });
+        if (!member) {
+            res.status(404).json({ message: "No member found!" });
+            return;
+        }
+        res.status(200).json(member);
+    }
+    catch (error) {
+        console.log(error);
+        res
+            .status(500)
+            .json({ message: `Failed to retreive member ${(_a = error.message) !== null && _a !== void 0 ? _a : ""}` });
+    }
+});
+exports.getMember = getMember;
