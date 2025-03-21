@@ -153,7 +153,11 @@ export const getMember = async (req: GetMemberRequest, res: Response) => {
         id: memberId,
       },
       include: {
-        calendarDays: true,
+        calendarDays: {
+          orderBy: {
+            day: "asc",
+          },
+        },
         organization: true,
       },
     });

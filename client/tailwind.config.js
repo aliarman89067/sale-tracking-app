@@ -27,6 +27,8 @@ module.exports = {
           500: "#00B4D8",
           600: "#0077B6",
         },
+        successGreen: "#75EC9D",
+        errorRed: "#EC7575",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

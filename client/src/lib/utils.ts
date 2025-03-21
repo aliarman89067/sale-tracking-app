@@ -48,3 +48,31 @@ export const getNameByRole = ({
     ? idToken?.payload?.["custom:agentname"]
     : "";
 };
+
+export const getRemainingDays = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  let remainingDaysCount = 0;
+  for (let day = 0; day < totalDays; day++) {
+    const currentDay = new Date(year, month, day);
+    const isPast = currentDay < today;
+    remainingDaysCount = isPast
+      ? remainingDaysCount
+      : (remainingDaysCount += 1);
+  }
+  return remainingDaysCount;
+};
+
+export const getRemainingTarget = ({
+  currentSale,
+  monthlyTarget,
+}: {
+  currentSale: number;
+  monthlyTarget: number;
+}) => {
+  if (currentSale >= monthlyTarget) return 0;
+  const remainingTarget = Math.round(monthlyTarget - currentSale);
+  return remainingTarget;
+};

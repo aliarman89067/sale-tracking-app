@@ -107,7 +107,11 @@ const getMember = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 id: memberId,
             },
             include: {
-                calendarDays: true,
+                calendarDays: {
+                    orderBy: {
+                        day: "asc",
+                    },
+                },
                 organization: true,
             },
         });

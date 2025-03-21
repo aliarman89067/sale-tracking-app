@@ -16,23 +16,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { useEffect, useState } from "react";
 
-const chartData = [
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-];
-const chartConfig = {
-  visitors: {
-    label: "",
-  },
-  safari: {
-    label: "Safari",
-    color: "#00B4D8",
-  },
-} satisfies ChartConfig;
+const SalesPercentageChart = ({
+  currentSale,
+  monthlyTarget,
+}: SalesPercentageChartProps) => {
+  const [percentange, setPercentage] = useState(0);
+  useEffect(() => {
+    const per = (currentSale / monthlyTarget) * 100;
+    setPercentage(per);
+  }, [currentSale, monthlyTarget]);
 
-const SalesPercentageChart = () => {
+  const chartData = [
+    { browser: "safari", visitors: percentange, fill: "var(--color-safari)" },
+  ];
+  const chartConfig = {
+    visitors: {
+      label: "",
+    },
+    safari: {
+      label: "Safari",
+      color: "#00B4D8",
+    },
+  } satisfies ChartConfig;
+
   return (
-    <Card className="flex flex-col border-0 outline-none ring-0 shadow-none">
+    <Card className="flex flex-col border-0 outline-none ring-0 shadow-none w-full h-full flex-grow shrink-0 flex-1">
       <CardContent className="flex-1 pb-0 border-0 outline-none ring-0 shadow-none">
         <ChartContainer
           config={chartConfig}
@@ -41,18 +51,18 @@ const SalesPercentageChart = () => {
           <RadialBarChart
             data={chartData}
             startAngle={0}
-            endAngle={100}
+            endAngle={(percentange / 277) * 1000}
             innerRadius={110}
-            outerRadius={160}
+            outerRadius={170}
           >
             <PolarGrid
               gridType="circle"
               radialLines={false}
               stroke="none"
               className="first:fill-muted last:fill-background"
-              polarRadius={[80, 74]}
+              polarRadius={[124, 100]}
             />
-            <RadialBar dataKey="visitors" background cornerRadius={10} />
+            <RadialBar dataKey="visitors" background cornerRadius={20} />
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
                 content={({ viewBox }) => {
@@ -67,9 +77,9 @@ const SalesPercentageChart = () => {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-4xl font-bold"
+                          className="text-4xl font-semibold fill-primaryGray"
                         >
-                          {chartData[0].visitors.toLocaleString()}
+                          {chartData[0].visitors.toLocaleString()}%
                         </tspan>
                       </text>
                     );

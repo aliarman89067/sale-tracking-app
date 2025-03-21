@@ -5,8 +5,10 @@ import { useGetMemberQuery } from "@/state/api";
 import { CircleAlert, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, getRemainingDays, getRemainingTarget } from "@/lib/utils";
 import SalesPercentageChart from "@/components/SalesPercentageChart";
+import AgentSheet from "./AgentSheet";
+import PreviousMonthsHistory from "./PreviousMonthsHistory";
 
 const MemberDetailsContainer = ({ memberId }: MemberDetailsContainerProps) => {
   const {
@@ -27,7 +29,6 @@ const MemberDetailsContainer = ({ memberId }: MemberDetailsContainerProps) => {
       </div>
     );
   }
-
   return (
     <section className="w-full flex flex-col gap-5 max-w-screen-xl mx-auto mb-4">
       <div className="w-full mt-10">
@@ -110,7 +111,25 @@ const MemberDetailsContainer = ({ memberId }: MemberDetailsContainerProps) => {
               />
             </div>
           </div>
-          <SalesPercentageChart />
+          <div className="mt-8 flex flex-col items-center w-full h-full flex-grow shrink-0 flex-1">
+            <SalesPercentageChart
+              currentSale={memberData.currentSale}
+              monthlyTarget={memberData.monthlyTarget}
+            />
+            <span className="font-bold text-primaryGray text-xl text-center mt-3">
+              {getRemainingDays()} {getRemainingDays() > 1 ? "days" : "days"}{" "}
+              left
+            </span>
+            <span className="text-lg text-secondaryGray mt-1">
+              {getRemainingTarget({
+                monthlyTarget: memberData.monthlyTarget,
+                currentSale: memberData.currentSale,
+              })}
+              {memberData.targetCurrency} is required to complete the target.
+            </span>
+          </div>
+          <AgentSheet memberData={memberData} />
+          <PreviousMonthsHistory />
         </div>
       )}
     </section>

@@ -129,6 +129,7 @@ interface MembersDetailsProps {
   createdAt: Date;
   updatedAt: Date;
 }
+
 interface CalendarDaysProps {
   id: string;
   date: string;
@@ -137,4 +138,11 @@ interface CalendarDaysProps {
   sale?: string;
   leaveReason?: string;
   memberId: string;
+}
+interface SalesPercentageChartProps {
+  currentSale: number;
+  monthlyTarget: number;
+}
+interface AgentSheetProps {
+  memberData: MembersDetailsProps;
 }
